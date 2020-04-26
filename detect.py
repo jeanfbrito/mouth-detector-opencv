@@ -19,7 +19,7 @@ import numpy as np
 #Set up some required objects
 video_capture = cv2.VideoCapture(0) #Webcam object
 #Change Frame Rate
-video_capture.set(cv2.CAP_PROP_FPS, 10)
+video_capture.set(cv2.CAP_PROP_FPS, 30)
 #Change Resolution
 video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 320);
 video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 130);
@@ -84,7 +84,7 @@ while True:
         else:
             count_detected_frames = 0
 
-        if count_detected_frames > 15:
+        if count_detected_frames > 10:
             text = 'Boca aberta'
         else:
             text = 'Abra a boca'
