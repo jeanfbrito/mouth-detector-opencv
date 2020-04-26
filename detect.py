@@ -27,20 +27,38 @@ detector = dlib.get_frontal_face_detector() #Face detector
 #Landmark identifier. Set the filename to whatever you named the downloaded file
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
+def get_top_lip_height(lip_first_id, face_landmarks):
+    sum=0
+    for i in range(3):
+        # distance between two near points up and down
+        distance = math.sqrt( (face_landmarks.part(lip_first_id + i).x - face_landmarks.part(lip_first_id + i + 11).x)**2 +
+                              (face_landmarks.part(lip_first_id + i).y - face_landmarks.part(lip_first_id + i + 11).y)**2   )
+        sum += distance
+    return sum / 3
+
+def get_bottom_lip_height(lip_first_id, face_landmarks):
+    sum=0
+    for i in range(3):
+        # distance between two near points up and down
+        distance = math.sqrt( (face_landmarks.part(lip_first_id + i).x - face_landmarks.part(lip_first_id + i + 9).x)**2 +
+                              (face_landmarks.part(lip_first_id + i).y - face_landmarks.part(lip_first_id + i + 9).y)**2   )
+        sum += distance
+    return sum / 3
+
+def get_mouth_height(mouth_first_id, face_landmarks):
+    sum=0
+    for i in range(3):
+        # distance between two near points up and down
+        distance = math.sqrt( (face_landmarks.part(mouth_first_id + i).x - face_landmarks.part(mouth_first_id + 6 - i).x)**2 +
+                              (face_landmarks.part(mouth_first_id + i).y - face_landmarks.part(mouth_first_id + 6 - i).y)**2   )
+        sum += distance
+    return sum / 3
+
+
 def is_mouth_open(face_landmarks):
-    top_lip_top = face_landmarks.part(51)
-    top_lip_bottom = face_landmarks.part(62)
-    bottom_lip_top = face_landmarks.part(66)
-    bottom_lip_bottom = face_landmarks.part(57)
-
-    top_lip_height = math.sqrt( (top_lip_top.x - top_lip_bottom.x)**2 +
-                              (top_lip_top.y - top_lip_bottom.y)**2   )
-
-    bottom_lip_height = math.sqrt( (bottom_lip_top.x - bottom_lip_bottom.x)**2 +
-                              (bottom_lip_top.y - bottom_lip_bottom.y)**2   )
-
-    mouth_height = math.sqrt( (top_lip_bottom.x - bottom_lip_top.x)**2 +
-                              (top_lip_bottom.y - bottom_lip_top.y)**2   )
+    top_lip_height =  get_top_lip_height(50, face_landmarks)
+    bottom_lip_height = get_bottom_lip_height(56, face_landmarks)
+    mouth_height = get_mouth_height(61, face_landmarks)
 
     # if mouth is open more than lip height * ratio, return true.
     ratio = 1.0
@@ -90,7 +108,7 @@ while True:
             text = 'Abra a boca'
         cv2.putText(frame, text, (200, 420), cv2.FONT_HERSHEY_DUPLEX, 1.0, (0, 0, 255), 1)
 
-    cv2.circle(frame,(300, 300), 70, (0,0,255), 2)
+    cv2.circle(frame,(320, 300), 70, (0,0,255), 2)
     #cv2.imshow("masked", masked)
     cv2.imshow("image", frame) #Display the frame
 
