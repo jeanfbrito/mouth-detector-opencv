@@ -5,6 +5,7 @@
 import cv2
 import dlib
 import math
+import numpy as np
 
 #Dlib positions
 #  ("mouth", (48, 68)),
@@ -42,7 +43,7 @@ def is_mouth_open(face_landmarks):
                               (top_lip_bottom.y - bottom_lip_top.y)**2   )
 
     # if mouth is open more than lip height * ratio, return true.
-    ratio = 2.0
+    ratio = 1.0
     #print('top_lip_height: %.2f, bottom_lip_height: %.2f, mouth_height: %.2f, min*ratio: %.2f'
          # % (top_lip_height,bottom_lip_height,mouth_height, min(top_lip_height, bottom_lip_height) * ratio))
 
@@ -60,6 +61,12 @@ while True:
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     clahe_image = clahe.apply(gray)
 
+    mask = np.zeros(frame.shape[:2], dtype='uint8')
+    (center_x, center_y) = (frame.shape[1] // 2, frame.shape[0] // 2)
+    cv2.circle(mask, (center_x, center_y), 100, 255, -1)
+    masked = cv2.bitwise_and(frame, frame, mask=mask)
+    clahe_image = masked
+
     detections = detector(clahe_image, 1) #Detect the faces in the image
 
     for k,d in enumerate(detections): #For each detected face
@@ -73,17 +80,18 @@ while True:
         # Display text for mouth open / close
         ret_mouth_open = is_mouth_open(shape)
         if ret_mouth_open is True:
-            count_detected_frames = 0
-        else:
             count_detected_frames = count_detected_frames + 1
+        else:
+            count_detected_frames = 0
 
         if count_detected_frames > 15:
-            text = 'Abra a boca'
-        else:
             text = 'Boca aberta'
+        else:
+            text = 'Abra a boca'
         cv2.putText(frame, text, (200, 420), cv2.FONT_HERSHEY_DUPLEX, 1.0, (0, 0, 255), 1)
 
-    cv2.circle(frame,(340, 200), 50, (0,0,255), 2)
+    cv2.circle(frame,(300, 300), 70, (0,0,255), 2)
+    #cv2.imshow("masked", masked)
     cv2.imshow("image", frame) #Display the frame
 
     if cv2.waitKey(1) & 0xFF == ord('q'): #Exit program when the user presses 'q'
